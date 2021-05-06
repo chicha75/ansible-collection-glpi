@@ -4,7 +4,7 @@ version: "0.1.0"
 readme: "README.rst"
 authors:
 - "François Ménabé <francois.menabe@unistra.fr>"
-dependencies: []
+dependencies: {}
 license:
 - "GPL3"
 tags:
