@@ -80,7 +80,8 @@ class InventoryModule(BaseInventoryPlugin):
             self.glpi = GLPI(
                 url=config['glpi_url'],
                 apptoken=config['glpi_apptoken'],
-                auth=config['glpi_auth']
+                auth=config['glpi_auth'],
+                verify_certs=config['verify_certs'] if 'verify_certs' in config else True
             )
 
             # Recursively update inventory from configuration. Groups are popped
@@ -165,21 +166,27 @@ class InventoryModule(BaseInventoryPlugin):
             )
 
         # Retrieve data using GLPI API.
-        data = self.glpi.search(
-            itemtype=group_conf['itemtype'],
-            forcedisplay=group_conf['forcedisplay'],
-            criteria=group_conf['criteria'],
-            metacriteria=group_conf['metacriteria'],
-            range='0-9999'
-        )
+        try:
+            data = self.glpi.search(
+                itemtype=group_conf['itemtype'],
+                forcedisplay=group_conf['forcedisplay'],
+                criteria=group_conf['criteria'],
+                metacriteria=group_conf['metacriteria'],
+                range='0-9999'
+            )
+        except:
+            data=[]
 
         # Retrieve group's hosts and manage hostvars.
         self.inventory.add_group(group)
         hosts = []
         for entry in data:
             # Generate hostvars from the current entry.
-            entry_hostvars = {param: replace_fields_values(value, entry)
-                              for param, value in group_conf['hostvars'].items()}
+            if 'hostvars' in group_conf and isinstance(group_conf['hostvars'], dict): 
+                entry_hostvars = {param: replace_fields_values(value, entry)
+                                  for param, value in group_conf['hostvars'].items()}
+            else:
+                entry_hostvars={}
 
             # Sometime returned host can be a list of host (as when retrieving
             # virtual machines). For preventing code redundancy, manage everything
@@ -191,5 +198,6 @@ class InventoryModule(BaseInventoryPlugin):
             # of the host in the inventory.
             for h in host:
                 #hosts.append(h.lower()) # Force host to be lowercase
-                self.inventory.add_host(h, group=group)
-                self.inventory.set_variable(h, 'glpi', entry_hostvars)
+                if len(h)>0:
+                    self.inventory.add_host(h, group=group)
+                    self.inventory.set_variable(h, 'glpi', entry_hostvars)
