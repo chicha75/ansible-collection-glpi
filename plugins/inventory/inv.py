@@ -2,7 +2,7 @@ import re
 from ansible.plugins.inventory import BaseInventoryPlugin
 from ansible.module_utils._text import to_native
 from ansible.errors import AnsibleError
-from glpi_api import GLPI, GLPIError
+from ansible_collections.unistra.glpi.plugins.api.glpi_api import GLPI, GLPIError
 
 # Configuration parameters of a group.
 GROUP_PARAMS = ('itemtype',         # GLPI item type

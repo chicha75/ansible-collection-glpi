@@ -6,7 +6,8 @@ from ansible.module_utils._text import to_native
 
 import traceback
 try:
-    import glpi_api
+    #import glpi_api
+    import from ansible_collections.unistra.glpi.plugins.api.glpi_api
     HAS_GLPI = True
 except ImportError:
     HAS_GLPI = False
